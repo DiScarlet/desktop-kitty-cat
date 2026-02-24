@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://cmdnxrn52yi50"]
 
 [ext_resource type="Texture2D" uid="uid://b8y5nms0ivjcf" path="res://images/CatsMain/white_0.png" id="1_myi5k"]
+[ext_resource type="Script" uid="uid://dirqq6cikkycw" path="res://scripts/cat.gd" id="1_se5fe"]
+[ext_resource type="Texture2D" uid="uid://brisufohwto55" path="res://images/Test/orange.png" id="3_t8pth"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_myi5k"]
 atlas = ExtResource("1_myi5k")
@@ -271,6 +273,14 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": ExtResource("3_t8pth")
+}],
+"loop": true,
+"name": &"test_orange",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_se5fe")
 }, {
 "duration": 1.0,
@@ -291,11 +301,12 @@ animations = [{
 size = Vector2(22, 18)
 
 [node name="Cat" type="CharacterBody2D" unique_id=841155388]
+script = ExtResource("1_se5fe")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1168238210]
+scale = Vector2(0.05, 0.05)
 sprite_frames = SubResource("SpriteFrames_tol8a")
-animation = &"walking_l"
-autoplay = "walking_l"
+animation = &"test_orange"
 
 [node name="Area2D" type="Area2D" parent="." unique_id=1116356808]
 
