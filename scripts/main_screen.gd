@@ -3,7 +3,7 @@ extends Node2D
 #VARS
 
 #constants
-const CAT_SIZE_MULTIPLYER = 5.0
+const CAT_SIZE_MULTIPLYER = 1.5
 
 #Godot elements
 @onready var cat: CharacterBody2D = $Cat
@@ -13,6 +13,7 @@ const CAT_SIZE_MULTIPLYER = 5.0
 
 #system funcs
 func _ready() -> void:
+	RenderingServer.set_default_clear_color(Color(22.001, 22.001, 22.001, 0.0))
 	setup_transparent_window()
 	setup_cat()
 	
@@ -24,7 +25,8 @@ func setup_transparent_window() -> void:
 	var window = get_window()
 	
 	var size = DisplayServer.screen_get_size()
-	DisplayServer.window_set_size(size + Vector2i(2, 2))
+	DisplayServer.window_set_size(size + Vector2i(5,5))
+	window.position = Vector2i.ZERO
 	
 	get_viewport().transparent_bg = true
 	window.transparent = true
