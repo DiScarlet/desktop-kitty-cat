@@ -10,6 +10,8 @@ var is_following_mouse = true
 var animation_direction
 #Godot elements
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+#lists/dicts
+var DIRECTIONS = ["t", "b", "r", "l", "tl", "bl", "tr", "br"]
 
 
 #FUNCS
@@ -17,7 +19,7 @@ var animation_direction
 #system funcs
 func _ready() -> void:
 
-#subscribe to signals
+	#subscribe to signals
 	GameManager.cat_start_mouse_follow.connect(on_start_mouse_follow)
 
 func _physics_process(delta):
@@ -26,45 +28,26 @@ func _physics_process(delta):
 
 #action functions
 func follow_mouse(delta):
-	var mouse_position = get_global_mouse_position()
-	
-	if global_position.distance_to(mouse_position) < MAX_DISTANCE_TO_MOUSE:
-		velocity = Vector2.ZERO
-		return
+	var mouse_screen = Vector2(DisplayServer.mouse_get_position()) 
+	var window_screen = Vector2(DisplayServer.window_get_position()) 
+	var window_size = Vector2(DisplayServer.window_get_size()) 
 
-	var direction = global_position.direction_to(mouse_position)
+	print("mouse_screen: " + str(mouse_screen)) 
+	print("window_screen: " + str(window_screen)) 
+	print("window_size: " + str(window_size)) 
 
-	play_correct_animation(determine_animation_direction(direction), "walk")
+	var cat_screen = window_screen + window_size / 2 # 
+	var distance: float = cat_screen.distance_to(mouse_screen) 
 
-	global_position += direction * SPEED * delta
-
-	update_passthrough()
-
-
-
+	if distance < MAX_DISTANCE_TO_MOUSE: 
+		return 
+		
+	var direction = cat_screen.direction_to(mouse_screen) 
+	play_correct_animation(determine_animation_direction(direction), "walk") 
+	window_screen += Vector2(direction * SPEED * delta) 
+	DisplayServer.window_set_position(window_screen)
 
 #system functions
-func update_passthrough():
-	var shape = $Area2D/CollisionShape2D.shape
-
-	var extents
-	if shape is RectangleShape2D:
-		extents = shape.size / 1
-	
-	var points = [
-	Vector2(-extents.x, -extents.y),
-	Vector2(extents.x, -extents.y),
-	Vector2(extents.x, extents.y),
-	Vector2(-extents.x, extents.y)
-	]
-	
-	var global_points := PackedVector2Array()
-	
-	for p in points:
-		global_points.append($Area2D.to_global(p))
-	
-	get_window().mouse_passthrough_polygon = global_points
-	
 
 #signal functions
 func on_start_mouse_follow():
@@ -74,38 +57,30 @@ func on_stop_mouse_follow():
 	is_following_mouse = false
 
 #helper functions
-func determine_animation_direction(direction: Vector2) -> String:
+func determine_animation_direction(direction) -> String:
 	var angle = rad_to_deg(direction.angle())
-	
+
 	if angle < 0:
 		angle += 360
-	
-	# Right
+
 	if angle >= 337.5 or angle < 22.5:
 		return "r"
-	# Bottom Right
 	elif angle < 67.5:
 		return "br"
-	# Bottom
 	elif angle < 112.5:
 		return "b"
-	# Bottom Left
 	elif angle < 157.5:
 		return "bl"
-	# Left
 	elif angle < 202.5:
 		return "l"
-	# Top Left
 	elif angle < 247.5:
 		return "tl"
-	# Top
 	elif angle < 292.5:
 		return "t"
-	# Top Right
 	else:
 		return "tr"
 		
-	
+		
 func play_correct_animation(current_direction: String, animation_name: String) -> void:
 	# Do nothing if direction didn't change
 	if animation_direction == current_direction:
