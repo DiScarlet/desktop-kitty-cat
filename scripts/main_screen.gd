@@ -16,9 +16,6 @@ func _ready() -> void:
 	setup_transparent_window()
 	setup_cat()
 	
-func _process(delta: float) -> void:
-	pass
-	
 #setup funcs
 func setup_transparent_window() -> void:
 	var window = get_window()

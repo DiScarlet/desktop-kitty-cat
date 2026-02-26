@@ -4,10 +4,11 @@ extends CharacterBody2D
 
 #constants
 const SPEED = 300.0
-const MAX_DISTANCE_TO_MOUSE = 100.0
+const MAX_DISTANCE_TO_MOUSE = 140.0
 #locals
-var is_following_mouse = true
+var is_following_mouse = false
 var animation_direction
+var is_sitting = false
 #Godot elements
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 #lists/dicts
@@ -32,17 +33,25 @@ func follow_mouse(delta):
 	var window_screen = Vector2(DisplayServer.window_get_position()) 
 	var window_size = Vector2(DisplayServer.window_get_size()) 
 
-	print("mouse_screen: " + str(mouse_screen)) 
-	print("window_screen: " + str(window_screen)) 
-	print("window_size: " + str(window_size)) 
-
-	var cat_screen = window_screen + window_size / 2 # 
+	var cat_screen = window_screen + window_size / 2 
 	var distance: float = cat_screen.distance_to(mouse_screen) 
 
+	var direction
+	
 	if distance < MAX_DISTANCE_TO_MOUSE: 
-		return 
+		if is_sitting:
+			return
+			
+		is_sitting = true
+		direction = cat_screen.direction_to(mouse_screen) 
+		var animation_direction
+		play_correct_animation(determine_animation_direction(direction), "sit", false) 
+		return
 		
-	var direction = cat_screen.direction_to(mouse_screen) 
+	is_sitting = false
+	
+	direction = cat_screen.direction_to(mouse_screen) 
+
 	play_correct_animation(determine_animation_direction(direction), "walk") 
 	window_screen += Vector2(direction * SPEED * delta) 
 	DisplayServer.window_set_position(window_screen)
@@ -81,14 +90,16 @@ func determine_animation_direction(direction) -> String:
 		return "tr"
 		
 		
-func play_correct_animation(current_direction: String, animation_name: String) -> void:
+func play_correct_animation(current_direction: String, animation_name: String, check_for_same_direction: bool = true) -> void:
 	# Do nothing if direction didn't change
-	if animation_direction == current_direction:
-		return
+	if check_for_same_direction:
+		if animation_direction == current_direction:
+			return
 		
 	animation_direction = current_direction
 
 	var animation_to_play = animation_name + "_" + current_direction
-
+	
 	if sprite.sprite_frames.has_animation(animation_to_play):
 		sprite.play(animation_to_play)
+		
