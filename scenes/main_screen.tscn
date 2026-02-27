@@ -10,6 +10,7 @@ bg_color = Color(1, 0.34663576, 0.24428523, 1)
 script = ExtResource("1_kusfh")
 
 [node name="Panel" type="Panel" parent="." unique_id=701663391]
+visible = false
 offset_left = -215.0
 offset_top = -114.0
 offset_right = 594.0

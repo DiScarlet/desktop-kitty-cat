@@ -11,7 +11,8 @@ const CatState = GameManager.CatState
 #locals
 var is_following_mouse = false
 var current_state: CatState = CatState.WALKING
-var animation_direction
+var animation_direction: String = "b"
+var idle_direction: String = "b"
 #Godot elements
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 #lists/dicts/enums
@@ -46,35 +47,42 @@ func follow_mouse(delta):
 	if distance < MAX_DISTANCE_TO_MOUSE:
 		if current_state == CatState.WALKING:
 			manage_sitting(cur_animation_direction)
-			return
-		else:
-			return
+		return
 		
-			
+	#Walking logic		
 	if current_state != CatState.WALKING:
 		current_state = CatState.WALKING
-		print("state changed to: " + CatState.keys()[current_state])
+		print(CatState.keys()[current_state] + " in direction: " + cur_animation_direction)
+		
+	play_correct_animation(cur_animation_direction, "walk") 
 
-	play_correct_animation(determine_animation_direction(direction), "walk") 
 	window_screen += Vector2(direction * SPEED * delta) 
 	DisplayServer.window_set_position(window_screen)
 
 func manage_sitting(cur_animation_direction):
+	if current_state != CatState.WALKING:
+		return
+		
 	current_state = CatState.SITTING
-	print("state changed to: " + CatState.keys()[current_state])
+	idle_direction = cur_animation_direction
 	
-	play_correct_animation(cur_animation_direction, "sit", false) 
+	print(CatState.keys()[current_state] + " in direction: " + idle_direction)
+	
+	play_correct_animation(idle_direction, "sit", false) 
 		
 	await get_tree().create_timer(TIME_IDLE_TO_LAYING).timeout
 	
 	if current_state == CatState.SITTING:
-		manage_laying(cur_animation_direction)
+		manage_laying()
 	
-func manage_laying(cur_animation_direction):
+func manage_laying():
+	if current_state != CatState.SITTING:
+		return
+		
 	current_state = CatState.LAYING
-	print("state changed to: " + CatState.keys()[current_state])
+	print(CatState.keys()[current_state] + " in direction: " + idle_direction)
 	
-	play_correct_animation(cur_animation_direction, "lay", false)
+	play_correct_animation(idle_direction, "lay", false)
 	
 #system functions
 func center_sprite():
