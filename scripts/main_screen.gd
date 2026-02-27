@@ -4,7 +4,7 @@ extends Node2D
 
 #constants
 const CAT_SIZE_MULTIPLYER = 1.0
-
+const WINDOW_SIZE = Vector2i(200, 180)
 #Godot elements
 @onready var cat: CharacterBody2D = $Cat
 
@@ -28,10 +28,11 @@ func setup_transparent_window() -> void:
 	
 	window.unresizable = false
 	
-	window.size = Vector2i(200, 200)
+	window.size = WINDOW_SIZE
 	
 func setup_cat() -> void:
 	cat.scale = Vector2.ONE * CAT_SIZE_MULTIPLYER
+	cat.center_sprite()
 	
 #systeem functions
 

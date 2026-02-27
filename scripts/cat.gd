@@ -1,3 +1,4 @@
+class_name Cat
 extends CharacterBody2D
 
 #VARS
@@ -5,13 +6,15 @@ extends CharacterBody2D
 #constants
 const SPEED = 300.0
 const MAX_DISTANCE_TO_MOUSE = 140.0
+const TIME_IDLE_TO_LAYING = 5.0
+const CatState = GameManager.CatState
 #locals
 var is_following_mouse = false
+var current_state: CatState = CatState.WALKING
 var animation_direction
-var is_sitting = false
 #Godot elements
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
-#lists/dicts
+#lists/dicts/enums
 var DIRECTIONS = ["t", "b", "r", "l", "tl", "bl", "tr", "br"]
 
 
@@ -22,7 +25,8 @@ func _ready() -> void:
 
 	#subscribe to signals
 	GameManager.cat_start_mouse_follow.connect(on_start_mouse_follow)
-
+	GameManager.change_cat_state.connect(on_change_cat_state)
+	
 func _physics_process(delta):
 	if is_following_mouse:
 		follow_mouse(delta)
@@ -36,35 +40,58 @@ func follow_mouse(delta):
 	var cat_screen = window_screen + window_size / 2 
 	var distance: float = cat_screen.distance_to(mouse_screen) 
 
-	var direction
+	var direction = cat_screen.direction_to(mouse_screen)
+	var cur_animation_direction = determine_animation_direction(direction)
 	
-	if distance < MAX_DISTANCE_TO_MOUSE: 
-		if is_sitting:
+	if distance < MAX_DISTANCE_TO_MOUSE:
+		if current_state == CatState.WALKING:
+			manage_sitting(cur_animation_direction)
 			return
-			
-		is_sitting = true
-		direction = cat_screen.direction_to(mouse_screen) 
-		var animation_direction
-		play_correct_animation(determine_animation_direction(direction), "sit", false) 
-		return
+		else:
+			return
 		
-	is_sitting = false
-	
-	direction = cat_screen.direction_to(mouse_screen) 
+			
+	if current_state != CatState.WALKING:
+		current_state = CatState.WALKING
+		print("state changed to: " + CatState.keys()[current_state])
 
 	play_correct_animation(determine_animation_direction(direction), "walk") 
 	window_screen += Vector2(direction * SPEED * delta) 
 	DisplayServer.window_set_position(window_screen)
 
+func manage_sitting(cur_animation_direction):
+	current_state = CatState.SITTING
+	print("state changed to: " + CatState.keys()[current_state])
+	
+	play_correct_animation(cur_animation_direction, "sit", false) 
+		
+	await get_tree().create_timer(TIME_IDLE_TO_LAYING).timeout
+	
+	if current_state == CatState.SITTING:
+		manage_laying(cur_animation_direction)
+	
+func manage_laying(cur_animation_direction):
+	current_state = CatState.LAYING
+	print("state changed to: " + CatState.keys()[current_state])
+	
+	play_correct_animation(cur_animation_direction, "lay", false)
+	
 #system functions
-
+func center_sprite():
+	if sprite:
+		sprite.global_position = get_viewport_rect().size / 2
+	
 #signal functions
 func on_start_mouse_follow():
 	is_following_mouse = true
+	current_state = CatState.WALKING
 
 func on_stop_mouse_follow():
 	is_following_mouse = false
 
+func on_change_cat_state(new_state: CatState):
+	current_state = new_state
+	
 #helper functions
 func determine_animation_direction(direction) -> String:
 	var angle = rad_to_deg(direction.angle())

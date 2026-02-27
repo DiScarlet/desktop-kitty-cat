@@ -4,15 +4,16 @@
 [ext_resource type="Script" uid="uid://di2au1d67ckmp" path="res://scripts/main_screen.gd" id="1_kusfh"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kusfh"]
-bg_color = Color(0, 0, 0.6, 1)
+bg_color = Color(1, 0.34663576, 0.24428523, 1)
 
 [node name="MainScreen" type="Node2D" unique_id=1139478704]
 script = ExtResource("1_kusfh")
 
-[node name="Cat" parent="." unique_id=841155388 instance=ExtResource("1_7fvvs")]
-position = Vector2(58, 51)
-
-[node name="Panel" type="Panel" parent="." unique_id=1617440803]
-offset_right = 381.0
-offset_bottom = 256.0
+[node name="Panel" type="Panel" parent="." unique_id=701663391]
+offset_left = -215.0
+offset_top = -114.0
+offset_right = 594.0
+offset_bottom = 300.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_kusfh")
+
+[node name="Cat" parent="." unique_id=841155388 instance=ExtResource("1_7fvvs")]
