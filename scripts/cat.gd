@@ -53,9 +53,10 @@ func follow_mouse(delta):
 	if current_state != CatState.WALKING:
 		current_state = CatState.WALKING
 		print(CatState.keys()[current_state] + " in direction: " + cur_animation_direction)
-		
-	play_correct_animation(cur_animation_direction, "walk") 
-
+		play_correct_animation(cur_animation_direction, "walk", false) 
+	else:
+			play_correct_animation(cur_animation_direction, "walk") 	
+	
 	window_screen += Vector2(direction * SPEED * delta) 
 	DisplayServer.window_set_position(window_screen)
 
