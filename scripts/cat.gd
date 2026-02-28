@@ -5,16 +5,22 @@ extends CharacterBody2D
 #VARS
 
 #constants
+	#mouse follow
 const SPEED = 300.0
 const MIN_DISTANCE_TO_START_WALKING = 140.0
 const MAX_DISTANCE_TO_STOP = 100.0
 const TIME_IDLE_TO_LAYING = 5.0
 const CatState = GameManager.CatState
+	#notes
+const NOTE_SCENE = preload("res://scenes/AdditionalScenes/note_screen.tscn")
 #locals
+	#mouse follow
 var is_following_mouse = false
 var current_state: CatState = CatState.WALKING
 var animation_direction: String = "b"
 var idle_direction: String = "b"
+	#notes
+var note_instance = null
 #Godot elements
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 #lists/dicts/enums
@@ -27,14 +33,19 @@ var DIRECTIONS = ["t", "b", "r", "l", "tl", "bl", "tr", "br"]
 func _ready() -> void:
 
 	#subscribe to signals
+		#mouse follow
 	GameManager.cat_start_mouse_follow.connect(on_start_mouse_follow)
 	GameManager.change_cat_state.connect(on_change_cat_state)
+		#notes
+	GameManager.bring_note.connect(bring_note)
+	
 	
 func _physics_process(delta):
 	if is_following_mouse:
 		follow_mouse(delta)
 
 #action functions
+	#mouse follow
 func follow_mouse(delta):
 	var mouse_screen = Vector2(DisplayServer.mouse_get_position()) 
 	var window_screen = Vector2(DisplayServer.window_get_position()) 
@@ -87,6 +98,18 @@ func manage_laying():
 	print(CatState.keys()[current_state] + " in direction: " + idle_direction)
 	
 	play_correct_animation(idle_direction, "lay", false)
+	
+		#notes
+func bring_note():
+	if note_instance == null:
+		note_instance = NOTE_SCENE.instantiate()
+		get_tree().root.add_child(note_instance)
+		
+	var cat_screen = DisplayServer.window_get_position()
+	var note_offset = Vector2i(200, 0)
+
+	note_instance.position = cat_screen + note_offset
+	note_instance.show_random_note()
 	
 #system functions
 func center_sprite():

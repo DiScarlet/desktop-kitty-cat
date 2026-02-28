@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://btt45jf8or38i"]
+
+[ext_resource type="Script" uid="uid://ciwuxulvga74s" path="res://scripts/note_screen.gd" id="1_4qog5"]
+[ext_resource type="Texture2D" uid="uid://da17gm87k4ufk" path="res://images/Notes/notes_panel.png" id="2_k7mh4"]
+[ext_resource type="FontFile" uid="uid://bfp3k758ualhu" path="res://fonts/font1/f1.otf" id="3_lnlro"]
+
+[node name="NoteScreen" type="Window" unique_id=579063132]
+transparent_bg = true
+oversampling_override = 1.0
+position = Vector2i(0, 36)
+size = Vector2i(500, 285)
+unresizable = true
+borderless = true
+always_on_top = true
+transparent = true
+script = ExtResource("1_4qog5")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=157291360]
+position = Vector2(250, 142)
+texture = ExtResource("2_k7mh4")
+
+[node name="Label" type="Label" parent="Sprite2D" unique_id=544815887]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -354.0
+offset_top = -111.0
+offset_right = -44.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.79607844, 0.3137255, 0.50980395, 1)
+theme_override_fonts/font = ExtResource("3_lnlro")
+theme_override_font_sizes/font_size = 30
+text = "Meow, meow, meow"
+horizontal_alignment = 1
+vertical_alignment = 1
