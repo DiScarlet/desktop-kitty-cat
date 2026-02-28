@@ -1,11 +1,13 @@
 class_name Cat
 extends CharacterBody2D
 
+#TODO: Implement hysteresis on close following and threshold following
 #VARS
 
 #constants
 const SPEED = 300.0
-const MAX_DISTANCE_TO_MOUSE = 140.0
+const MIN_DISTANCE_TO_START_WALKING = 140.0
+const MAX_DISTANCE_TO_STOP = 100.0
 const TIME_IDLE_TO_LAYING = 5.0
 const CatState = GameManager.CatState
 #locals
@@ -43,19 +45,20 @@ func follow_mouse(delta):
 
 	var direction = cat_screen.direction_to(mouse_screen)
 	var cur_animation_direction = determine_animation_direction(direction)
-	
-	if distance < MAX_DISTANCE_TO_MOUSE:
-		if current_state == CatState.WALKING:
-			manage_sitting(cur_animation_direction)
+		
+	if current_state == CatState.WALKING and distance < MAX_DISTANCE_TO_STOP:
+		manage_sitting(cur_animation_direction)
 		return
 		
 	#Walking logic		
 	if current_state != CatState.WALKING:
+		if distance < MIN_DISTANCE_TO_START_WALKING:
+			return
 		current_state = CatState.WALKING
 		print(CatState.keys()[current_state] + " in direction: " + cur_animation_direction)
 		play_correct_animation(cur_animation_direction, "walk", false) 
 	else:
-			play_correct_animation(cur_animation_direction, "walk") 	
+		play_correct_animation(cur_animation_direction, "walk") 	
 	
 	window_screen += Vector2(direction * SPEED * delta) 
 	DisplayServer.window_set_position(window_screen)
