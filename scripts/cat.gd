@@ -23,6 +23,7 @@ var is_bringing_note = false
 var note_instance = null
 var note_stage = NoteStage.BORDER_1
 var target_border: Vector2
+var return_position: Vector2
 #Godot elements
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 #lists/dicts/enums
@@ -112,7 +113,7 @@ func manage_laying():
 	play_correct_animation(idle_direction, "lay", false)
 	
 		#notes
-func bring_note():
+func show_note():
 	if note_instance == null:
 		note_instance = NOTE_SCENE.instantiate()
 		get_tree().root.add_child(note_instance)
@@ -125,6 +126,12 @@ func bring_note():
 	
 func start_going_to_border():
 	target_border = find_closest_screen_border()
+	
+	var window_screen = Vector2(DisplayServer.window_get_position()) 
+	var window_size = Vector2(DisplayServer.window_get_size()) 
+
+	return_position = window_screen + window_size / 2
+
 	note_stage = NoteStage.BORDER_1
 	
 func process_go_to_border(delta):
@@ -135,8 +142,15 @@ func process_go_to_border(delta):
 		note_stage = NoteStage.BRINGING_OUT_2
 	
 func process_bring_note(delta):
-	print("2")
-	pass
+	var anim_vars = get_default_animation_vars(return_position)
+	var reached = go_to_location(anim_vars.window_screen, anim_vars.distance, anim_vars.direction, anim_vars.cur_animation_direction, delta)
+	
+	if reached:
+		note_stage = NoteStage.SHOWING_3
+		
+func show_note_finish():
+	is_bringing_note = false
+	show_note() # TODO: connect it to real note
 	
 #system functions
 func center_sprite():
@@ -160,15 +174,6 @@ func on_bring_note():
 	start_going_to_border()
 	is_following_mouse = false
 	is_bringing_note = true
-	
-func process_note(delta):
-	match note_stage:
-		NoteStage.BORDER_1:
-			process_go_to_border(delta)		
-			return
-			
-		NoteStage.BRINGING_OUT_2:
-			process_bring_note(delta)
 	
 #helper functions
 	#universal
@@ -240,3 +245,17 @@ func find_closest_screen_border() -> Vector2i:
 		target_x = win_x
 		
 	return Vector2i(target_x, cur_abs.y)
+	
+func process_note(delta):
+	match note_stage:
+		NoteStage.BORDER_1:
+			process_go_to_border(delta)		
+			return
+			
+		NoteStage.BRINGING_OUT_2:
+			process_bring_note(delta)
+			return
+			
+		NoteStage.SHOWING_3:
+			show_note_finish()
+			return
