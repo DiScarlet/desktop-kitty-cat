@@ -1,7 +1,6 @@
 class_name Cat
 extends CharacterBody2D
 
-#TODO: Implement hysteresis on close following and threshold following
 #VARS
 
 #constants
@@ -20,11 +19,18 @@ var current_state: CatState = CatState.WALKING
 var animation_direction: String = "b"
 var idle_direction: String = "b"
 	#notes
+var is_bringing_note = false
 var note_instance = null
+var note_stage = NoteStage.BORDER_1
+var target_border: Vector2
 #Godot elements
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 #lists/dicts/enums
-var DIRECTIONS = ["t", "b", "r", "l", "tl", "bl", "tr", "br"]
+enum NoteStage {
+	BORDER_1,
+	BRINGING_OUT_2,
+	SHOWING_3
+}
 
 
 #FUNCS
@@ -37,42 +43,48 @@ func _ready() -> void:
 	GameManager.cat_start_mouse_follow.connect(on_start_mouse_follow)
 	GameManager.change_cat_state.connect(on_change_cat_state)
 		#notes
-	GameManager.bring_note.connect(bring_note)
+	GameManager.bring_note.connect(on_bring_note)
 	
 	
 func _physics_process(delta):
+	#mouse follow
 	if is_following_mouse:
 		follow_mouse(delta)
-
-#action functions
-	#mouse follow
-func follow_mouse(delta):
-	var mouse_screen = Vector2(DisplayServer.mouse_get_position()) 
-	var window_screen = Vector2(DisplayServer.window_get_position()) 
-	var window_size = Vector2(DisplayServer.window_get_size()) 
-
-	var cat_screen = window_screen + window_size / 2 
-	var distance: float = cat_screen.distance_to(mouse_screen) 
-
-	var direction = cat_screen.direction_to(mouse_screen)
-	var cur_animation_direction = determine_animation_direction(direction)
-		
-	if current_state == CatState.WALKING and distance < MAX_DISTANCE_TO_STOP:
-		manage_sitting(cur_animation_direction)
 		return
 		
-	#Walking logic		
+	#notes
+	if is_bringing_note:
+		process_note(delta)
+
+#action functions
+	#universal
+func go_to_location(window_screen, distance, direction, cur_animation_direction, delta):
+	if distance < MIN_DISTANCE_TO_START_WALKING:
+		return true
+		
 	if current_state != CatState.WALKING:
-		if distance < MIN_DISTANCE_TO_START_WALKING:
-			return
 		current_state = CatState.WALKING
-		print(CatState.keys()[current_state] + " in direction: " + cur_animation_direction)
 		play_correct_animation(cur_animation_direction, "walk", false) 
 	else:
 		play_correct_animation(cur_animation_direction, "walk") 	
 	
 	window_screen += Vector2(direction * SPEED * delta) 
 	DisplayServer.window_set_position(window_screen)
+	
+	return false
+	
+
+	#mouse follow
+func follow_mouse(delta):
+	var mouse_screen = Vector2(DisplayServer.mouse_get_position()) 
+	var anim_vars = get_default_animation_vars(mouse_screen)
+		
+	if current_state == CatState.WALKING and anim_vars.distance < MAX_DISTANCE_TO_STOP:
+		manage_sitting(anim_vars.cur_animation_direction)
+		return
+		
+	#Walking logic		
+	go_to_location(anim_vars.window_screen, anim_vars.distance, anim_vars.direction, anim_vars.cur_animation_direction, delta)
 
 func manage_sitting(cur_animation_direction):
 	if current_state != CatState.WALKING:
@@ -111,12 +123,28 @@ func bring_note():
 	note_instance.position = cat_screen + note_offset
 	note_instance.show_random_note()
 	
+func start_going_to_border():
+	target_border = find_closest_screen_border()
+	note_stage = NoteStage.BORDER_1
+	
+func process_go_to_border(delta):
+	var anim_vars = get_default_animation_vars(target_border)
+	var reached = go_to_location(anim_vars.window_screen, anim_vars.distance, anim_vars.direction, anim_vars.cur_animation_direction, delta)
+	
+	if reached:
+		note_stage = NoteStage.BRINGING_OUT_2
+	
+func process_bring_note(delta):
+	print("2")
+	pass
+	
 #system functions
 func center_sprite():
 	if sprite:
 		sprite.global_position = get_viewport_rect().size / 2
 	
 #signal functions
+	#mouse follow
 func on_start_mouse_follow():
 	is_following_mouse = true
 	current_state = CatState.WALKING
@@ -127,7 +155,23 @@ func on_stop_mouse_follow():
 func on_change_cat_state(new_state: CatState):
 	current_state = new_state
 	
+	#notes
+func on_bring_note():
+	start_going_to_border()
+	is_following_mouse = false
+	is_bringing_note = true
+	
+func process_note(delta):
+	match note_stage:
+		NoteStage.BORDER_1:
+			process_go_to_border(delta)		
+			return
+			
+		NoteStage.BRINGING_OUT_2:
+			process_bring_note(delta)
+	
 #helper functions
+	#universal
 func determine_animation_direction(direction) -> String:
 	var angle = rad_to_deg(direction.angle())
 
@@ -165,3 +209,34 @@ func play_correct_animation(current_direction: String, animation_name: String, c
 	if sprite.sprite_frames.has_animation(animation_to_play):
 		sprite.play(animation_to_play)
 		
+func get_default_animation_vars(target_position: Vector2i):
+	var window_screen = Vector2(DisplayServer.window_get_position()) 
+	var window_size = Vector2(DisplayServer.window_get_size()) 
+
+	var cat_screen = window_screen + window_size / 2 
+	var distance: float = cat_screen.distance_to(target_position) 
+	var direction = cat_screen.direction_to(target_position)
+	
+	return {
+		"window_screen": window_screen,
+		"distance": distance,
+		"direction": direction,
+		"cur_animation_direction": determine_animation_direction(direction)
+	}	
+		
+	#notes
+static func get_abs_screen_position() -> Vector2i:
+	return DisplayServer.window_get_position()
+		
+func find_closest_screen_border() -> Vector2i:
+	var cur_abs = Cat.get_abs_screen_position()
+	var cur_x = cur_abs.x
+	var win_x = DisplayServer.screen_get_size().x
+	var target_x
+	
+	if cur_x <= win_x / 2:
+		target_x = 0
+	else:
+		target_x = win_x
+		
+	return Vector2i(target_x, cur_abs.y)

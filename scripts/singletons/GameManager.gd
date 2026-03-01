@@ -4,7 +4,6 @@ extends Node
 	#mouse follow
 signal cat_start_mouse_follow
 signal change_cat_state(new_state: CatState)
-
 	#notes
 signal bring_note
 
@@ -15,9 +14,8 @@ enum CatState {
 	WALKING,
 	SITTING,
 	LAYING,
-	IDLE_START
+	IDLE_START,
 }
-
 
 #FUNCS
 #system functions

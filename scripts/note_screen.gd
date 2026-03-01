@@ -2,7 +2,7 @@ extends Window
 
 #VARS
 #constants
-const WINDOW_SIZE = Vector2i(400, 228)
+const WINDOW_SIZE = Vector2i(386, 281)
 #locals
 #Godot elements
 @onready var label: Label = $Sprite2D/Label
@@ -33,4 +33,3 @@ func setup_instance():
 	sprite.global_position = WINDOW_SIZE / 2
 	
 #helper functions
-#func find_closest_screen_border():
