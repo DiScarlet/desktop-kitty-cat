@@ -9,6 +9,8 @@ signal bring_note
 
 
 #VARS
+#Globals(for the project), locals(for GameManager)
+var note_window_id
 #lists/dicts/enums
 enum CatState {
 	WALKING,
@@ -16,6 +18,8 @@ enum CatState {
 	LAYING,
 	IDLE_START,
 }
+#object instances
+var cat: Cat
 
 #FUNCS
 #system functions
@@ -33,7 +37,9 @@ func _input(event: InputEvent) -> void:
 			
 	#notes
 	if event is InputEventKey:
-		if event.pressed:
-			bring_note.emit()
-			print("Cat will bring the note!")
+		if cat and event.pressed:
+			var cat_state = cat.get_current_state()
+			if cat_state == CatState.SITTING or cat_state == CatState.LAYING:
+				bring_note.emit()
+				print("Cat will bring the note!")
 	

@@ -6,16 +6,17 @@ extends CharacterBody2D
 #constants
 	#mouse follow
 const SPEED = 300.0
-const MIN_DISTANCE_TO_START_WALKING = 140.0
-const MAX_DISTANCE_TO_STOP = 100.0
+const START_DISTANCE = 140.0
+const STOP_DISTANCE = 100.0
 const TIME_IDLE_TO_LAYING = 5.0
 const CatState = GameManager.CatState
 	#notes
 const NOTE_SCENE = preload("res://scenes/AdditionalScenes/note_screen.tscn")
+const NOTE_OFFSET := Vector2i(-340, 0)
 #locals
 	#mouse follow
 var is_following_mouse = false
-var current_state: CatState = CatState.WALKING
+var current_state: GameManager.CatState = GameManager.CatState.IDLE_START
 var animation_direction: String = "b"
 var idle_direction: String = "b"
 	#notes
@@ -38,13 +39,14 @@ enum NoteStage {
 
 #system funcs
 func _ready() -> void:
-
 	#subscribe to signals
 		#mouse follow
 	GameManager.cat_start_mouse_follow.connect(on_start_mouse_follow)
 	GameManager.change_cat_state.connect(on_change_cat_state)
 		#notes
 	GameManager.bring_note.connect(on_bring_note)
+	#initialize variables
+	GameManager.cat = self
 	
 	
 func _physics_process(delta):
@@ -60,7 +62,7 @@ func _physics_process(delta):
 #action functions
 	#universal
 func go_to_location(window_screen, distance, direction, cur_animation_direction, delta):
-	if distance < MIN_DISTANCE_TO_START_WALKING:
+	if distance <= STOP_DISTANCE:
 		return true
 		
 	if current_state != CatState.WALKING:
@@ -80,12 +82,14 @@ func follow_mouse(delta):
 	var mouse_screen = Vector2(DisplayServer.mouse_get_position()) 
 	var anim_vars = get_default_animation_vars(mouse_screen)
 		
-	if current_state == CatState.WALKING and anim_vars.distance < MAX_DISTANCE_TO_STOP:
+	if current_state == CatState.WALKING and anim_vars.distance < STOP_DISTANCE:
 		manage_sitting(anim_vars.cur_animation_direction)
 		return
 		
+	#TODO: FIX IT HERE
 	#Walking logic		
-	go_to_location(anim_vars.window_screen, anim_vars.distance, anim_vars.direction, anim_vars.cur_animation_direction, delta)
+	if anim_vars.distance >= START_DISTANCE:
+		go_to_location(anim_vars.window_screen, anim_vars.distance, anim_vars.direction, anim_vars.cur_animation_direction, delta)
 
 func manage_sitting(cur_animation_direction):
 	if current_state != CatState.WALKING:
@@ -113,6 +117,7 @@ func manage_laying():
 	play_correct_animation(idle_direction, "lay", false)
 	
 		#notes
+			#cat's logic
 func show_note():
 	if note_instance == null:
 		note_instance = NOTE_SCENE.instantiate()
@@ -140,22 +145,38 @@ func process_go_to_border(delta):
 	
 	if reached:
 		note_stage = NoteStage.BRINGING_OUT_2
+		show_note()
 	
 func process_bring_note(delta):
 	var anim_vars = get_default_animation_vars(return_position)
 	var reached = go_to_location(anim_vars.window_screen, anim_vars.distance, anim_vars.direction, anim_vars.cur_animation_direction, delta)
 	
+	update_note_position()
+	
 	if reached:
 		note_stage = NoteStage.SHOWING_3
 		
 func show_note_finish():
+	sprite.play("lay_l") #TODO: Change to real lay
 	is_bringing_note = false
-	show_note() # TODO: connect it to real note
 	
+			#notes's logic
+func update_note_position():
+	if GameManager.note_window_id == -1:
+		return
+		
+	var cat_window_pos = DisplayServer.window_get_position()
+	var note_pos = cat_window_pos + NOTE_OFFSET
+	
+	DisplayServer.window_set_position(note_pos, GameManager.note_window_id)
+
 #system functions
 func center_sprite():
 	if sprite:
 		sprite.global_position = get_viewport_rect().size / 2
+	
+func get_current_state() -> GameManager.CatState:
+	return current_state
 	
 #signal functions
 	#mouse follow
