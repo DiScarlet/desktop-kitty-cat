@@ -88,7 +88,17 @@ func follow_mouse(delta):
 		
 	#TODO: FIX IT HERE
 	#Walking logic		
-	if anim_vars.distance >= START_DISTANCE:
+	if current_state == CatState.WALKING:
+		if anim_vars.distance > STOP_DISTANCE:
+			go_to_location(anim_vars.window_screen, anim_vars.distance, anim_vars.direction, anim_vars.cur_animation_direction, delta)
+		else:
+			manage_sitting(anim_vars.cur_animation_direction)
+			
+	elif anim_vars.distance >= START_DISTANCE:
+		if current_state != CatState.WALKING:
+			current_state = CatState.WALKING
+			play_correct_animation(anim_vars.cur_animation_direction, "walk", false)
+			
 		go_to_location(anim_vars.window_screen, anim_vars.distance, anim_vars.direction, anim_vars.cur_animation_direction, delta)
 
 func manage_sitting(cur_animation_direction):

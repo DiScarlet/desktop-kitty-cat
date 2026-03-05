@@ -6,7 +6,7 @@ signal cat_start_mouse_follow
 signal change_cat_state(new_state: CatState)
 	#notes
 signal bring_note
-
+signal kill_note_instance
 
 #VARS
 #Globals(for the project), locals(for GameManager)
