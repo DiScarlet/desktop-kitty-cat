@@ -86,7 +86,6 @@ func follow_mouse(delta):
 		manage_sitting(anim_vars.cur_animation_direction)
 		return
 		
-	#TODO: FIX IT HERE
 	#Walking logic		
 	if current_state == CatState.WALKING:
 		if anim_vars.distance > STOP_DISTANCE:
@@ -129,9 +128,11 @@ func manage_laying():
 		#notes
 			#cat's logic
 func show_note():
-	if note_instance == null:
-		note_instance = NOTE_SCENE.instantiate()
-		get_tree().root.add_child(note_instance)
+	if note_instance != null:
+		return
+		
+	note_instance = NOTE_SCENE.instantiate()
+	get_tree().root.add_child(note_instance)
 		
 	var cat_screen = DisplayServer.window_get_position()
 	var note_offset = Vector2i(200, 0)
@@ -202,6 +203,10 @@ func on_change_cat_state(new_state: CatState):
 	
 	#notes
 func on_bring_note():
+	if note_instance != null:
+		print("Note is already there!")
+		return
+		
 	start_going_to_border()
 	is_following_mouse = false
 	is_bringing_note = true

@@ -3,13 +3,20 @@ extends Window
 #VARS
 #constants
 const WINDOW_SIZE = Vector2i(386, 281)
-const NOTE_TIMELIFE = 60
+const NOTE_LIFETIME = 10
+const VELOCITY := Vector2(0, -300)
+const ACCELERATION := Vector2(0, 20)
+const FADEOUT_TIME = 5
 #locals
 var dragging = false
 var click_position = Vector2()
+	#fade out
+var is_fading_out = false
+var cur_velocity = VELOCITY
 #Godot elements
 @onready var label: Label = $Sprite2D/Label
 @onready var sprite: Sprite2D = $Sprite2D
+@onready var particles: GPUParticles2D = $GPUParticles2D
 var timer: SceneTreeTimer
 #lists/dicts/enums
 var notes = [
@@ -24,9 +31,16 @@ var notes = [
 
 #system funcs
 func _ready() -> void:
+	particles.position = Vector2(190.0, 240.0)
+	#particles.process_material.spawn.position
+	set_process(false)
 	setup_instance()
 	
-	
+func _process(delta: float) -> void:
+	if is_fading_out:
+		cur_velocity += delta * ACCELERATION
+		position += Vector2i(cur_velocity * delta)
+		 
 #action functions
 func show_random_note():
 	label.text = notes.pick_random()
@@ -34,7 +48,7 @@ func show_random_note():
 	
 #setup funcs
 func setup_instance():
-	timer = get_tree().create_timer(NOTE_TIMELIFE)
+	timer = get_tree().create_timer(NOTE_LIFETIME)
 	timer.timeout.connect(_on_note_timeout)
 	GameManager.kill_note_instance.connect(_on_note_timeout)
 		
@@ -47,7 +61,12 @@ func setup_instance():
 	
 #event funcs
 func _on_note_timeout():
-	#TODO: CREATE A FUNC THAT LAUNCHES UP THE NOTE OR MAKES IT GO OUT BEUTIFULLT
+
+	particles.emitting = true
+	is_fading_out = true
+	set_process(true)
+	await get_tree().create_timer(FADEOUT_TIME).timeout
+	particles.emitting = false
 	queue_free()
 	
 #system funcs
