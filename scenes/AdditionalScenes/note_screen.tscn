@@ -16,6 +16,7 @@ linear_accel_max = 39.199997
 scale_min = 4.0
 scale_max = 5.0
 scale_over_velocity_max = 2.0
+color = Color(1, 0.78039217, 0.7490196, 1)
 anim_speed_min = 50.0
 anim_speed_max = 150.0
 turbulence_noise_scale = 2.0

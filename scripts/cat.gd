@@ -28,6 +28,8 @@ var target_border: Vector2
 var return_position: Vector2
 #Godot elements
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var meow_player: AudioStreamPlayer2D = $meow_player
+
 #lists/dicts/enums
 enum NoteStage {
 	BORDER_1,
@@ -77,7 +79,9 @@ func go_to_location(window_screen, distance, direction, cur_animation_direction,
 	
 	return false
 	
-
+func meow():
+	meow_player.play()
+	
 	#mouse follow
 func follow_mouse(delta):
 	var mouse_screen = Vector2(DisplayServer.mouse_get_position()) 
@@ -198,6 +202,7 @@ func get_current_state() -> GameManager.CatState:
 	#mouse follow
 func on_start_mouse_follow():
 	is_following_mouse = true
+	meow()
 	current_state = CatState.WALKING
 
 func on_stop_mouse_follow():
