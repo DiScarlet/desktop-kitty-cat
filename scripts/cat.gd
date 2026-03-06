@@ -6,7 +6,7 @@ extends CharacterBody2D
 #constants
 	#mouse follow
 const SPEED = 300.0
-const START_DISTANCE = 140.0
+const START_DISTANCE = 160.0
 const STOP_DISTANCE = 100.0
 const TIME_IDLE_TO_LAYING = 5.0
 const CatState = GameManager.CatState

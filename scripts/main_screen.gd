@@ -4,7 +4,7 @@ extends Node2D
 
 #constants
 const CAT_SIZE_MULTIPLYER = 1.0
-const WINDOW_SIZE = Vector2i(200, 180)
+const WINDOW_SIZE = Vector2i(160, 160)
 #Godot elements
 @onready var cat: CharacterBody2D = $Cat
 

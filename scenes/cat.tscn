@@ -1157,8 +1157,8 @@ animations = [{
 "speed": 5.0
 }]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_o55mh"]
-size = Vector2(174.50005, 144.50003)
+[sub_resource type="CircleShape2D" id="CircleShape2D_t8pth"]
+radius = 78.416374
 
 [node name="Cat" type="CharacterBody2D" unique_id=841155388]
 motion_mode = 1
@@ -1173,4 +1173,4 @@ animation = &"walk_b"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=641544702]
 position = Vector2(1.7499995, 11.750001)
 scale = Vector2(0.99999976, 0.99999976)
-shape = SubResource("RectangleShape2D_o55mh")
+shape = SubResource("CircleShape2D_t8pth")
