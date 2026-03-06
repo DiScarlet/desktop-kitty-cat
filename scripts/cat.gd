@@ -12,7 +12,8 @@ const TIME_IDLE_TO_LAYING = 5.0
 const CatState = GameManager.CatState
 	#notes
 const NOTE_SCENE = preload("res://scenes/AdditionalScenes/note_screen.tscn")
-const NOTE_OFFSET := Vector2i(-340, 0)
+const NOTE_OFFSET := Vector2i(-360, 0)
+const NOTE_SIZE = Vector2i(386, 281)
 #locals
 	#mouse follow
 var is_following_mouse = false
@@ -146,8 +147,12 @@ func start_going_to_border():
 	var window_screen = Vector2(DisplayServer.window_get_position()) 
 	var window_size = Vector2(DisplayServer.window_get_size()) 
 
-	return_position = window_screen + window_size / 2
+	var center = window_screen + window_size / 2
+	var min_x = NOTE_SIZE.x + abs(NOTE_OFFSET).x
+	
+	return_position = Vector2(max(center.x, NOTE_SIZE.x + abs(NOTE_OFFSET.x / 2)), center.y)
 
+	print("return " + str(return_position))
 	note_stage = NoteStage.BORDER_1
 	
 func process_go_to_border(delta):

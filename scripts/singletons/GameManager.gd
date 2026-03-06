@@ -24,8 +24,8 @@ var cat: Cat
 #FUNCS
 #system functions
 func _ready() -> void:
-	GlobalKeyboard.KeyPressed.connect(_on_global_key)
-	
+	#GlobalKeyboard.KeyPressed.connect(_on_global_key)
+	pass
 	
 #event fuctions
 func _input(event: InputEvent) -> void:
@@ -36,16 +36,16 @@ func _input(event: InputEvent) -> void:
 			print("Cat follows the mouse!")
 			
 	#notes
-	'''if event is InputEventKey:
+	if event is InputEventKey:
 		if cat and event.pressed:
 			var cat_state = cat.get_current_state()
 			if cat_state == CatState.SITTING or cat_state == CatState.LAYING:
 				bring_note.emit()
-				print("Cat will bring the note!")'''
+				print("Cat will bring the note!")
 	
-func _on_global_key():
+'''func _on_global_key():
 	if cat:
 		var cat_state = cat.get_current_state()
 		if cat_state == CatState.SITTING or cat_state == CatState.LAYING:
 			bring_note.emit()
-			print("Cat will bring the note!")
+			print("Cat will bring the note!")'''
